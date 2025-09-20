@@ -1,0 +1,37 @@
+name: Build UYouPlus
+
+on:
+  workflow_dispatch: # Cho phép bấm nút Run thủ công
+
+jobs:
+  build:
+    runs-on: macos-latest # Chạy trên server macOS của GitHub
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          brew install ldid
+          brew install xcodegen
+
+      - name: Build UYouPlus IPA
+        run: |
+          # Nếu repo có build.sh thì chạy nó
+          if [ -f "./build.sh" ]; then
+            chmod +x ./build.sh
+            ./build.sh
+          elif [ -f "./Scripts/build.sh" ]; then
+            chmod +x ./Scripts/build.sh
+            ./Scripts/build.sh
+          else
+            echo "Không tìm thấy build.sh"
+            exit 1
+          fi
+
+      - name: Upload IPA as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: UYouPlus-IPA
+          path: build/*.ipa
